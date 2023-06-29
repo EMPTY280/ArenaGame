@@ -1,0 +1,11 @@
+10
+Image/ArenaSprites/Player_0.png
+Image/ArenaSprites/Player_1.png
+Image/ArenaSprites/Player_2.png
+Image/ArenaSprites/AmmoBelt_0.png
+Image/ArenaSprites/AmmoBelt_1.png
+Image/ArenaSprites/AmmoBelt_2.png
+Image/ArenaSprites/CoolPants_0.png
+Image/ArenaSprites/CoolPants_1.png
+Image/ArenaSprites/CoolPants_2.png
+Image/ArenaSprites/Tophat.png
