@@ -21,13 +21,13 @@ void Behavior::SetPosition(MyVector2 direction, bool relative)
 	position = direction;
 }
 
-bool Behavior::Collider(MyVector2 aPos, float aRadius, MyVector2 bPos, float bRadius)
+bool Behavior::Collider(MyVector2 bPos, float bRadius)
 {
 	bool isEnter = false;
 
-	float dist = sqrt(pow(aPos.xPos - bPos.xPos, 2) + pow(aPos.yPos - bPos.yPos, 2));
+	float dist = sqrt(pow(position.xPos - bPos.xPos, 2) + pow(position.yPos - bPos.yPos, 2));
 
-	if (dist <= aRadius + bRadius)
+	if (dist <= radius + bRadius)
 	{
 		isEnter = true;
 	}
@@ -59,6 +59,11 @@ void Behavior::ShowCollider(Graphics* backGraphics, Color c)
 	backGraphics->DrawRectangle(&pen, (int)position.xPos, (int)position.yPos, 1, 1);
 }
 
+float Behavior::GetLife()
+{
+	return lifeTime;
+}
+
 void Behavior::SetLife(float time)
 {
 	lifeTime = time;
@@ -72,6 +77,11 @@ void Behavior::SetType(ObjType _type)
 ObjType Behavior::GetType() const
 {
 	return type;
+}
+
+float Behavior::GetRadius() const
+{
+	return radius;
 }
 
 void Behavior::SetRadius(float r)

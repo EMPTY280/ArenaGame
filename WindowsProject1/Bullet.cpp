@@ -25,9 +25,14 @@ void Bullet::SetAccel(float accel)
 	acceleration = accel;
 }
 
+void Bullet::SetTargetVector(MyVector2 vec)
+{
+	TargetVector = vec;
+}
+
 void Bullet::Start() { }
 
-void Bullet::Update(Graphics* backGraphics, float delatTime)
+void Bullet::Update(float delatTime)
 {
 	SetPosition(MoveVector * delatTime * velocity);
 
@@ -39,11 +44,39 @@ void Bullet::Update(Graphics* backGraphics, float delatTime)
 		isDead = true;
 
 	velocity += acceleration * delatTime;
-	if (velocity < 0.0f)
+	if (velocity < 0.0f && acceleration <= 0.0f)
 		isDead = true;
+
+	if (TargetVector.GetSize() == 0.0f)
+		return;
+	MoveVector = MoveVector + TargetVector * delatTime;
+	MoveVector.Normalize();
 }
 
-bool Bullet::Kill()
+bool Bullet::IsOwnerPlayer()
 {
-	return false;
+	return isPlayerOwned;
+}
+
+void Bullet::SetOwnerPlayer(bool b)
+{
+	isPlayerOwned = b;
+}
+
+void Bullet::OnCollision(Behavior& collider)
+{
+	if (!Collider(collider.GetPosition(), collider.GetRadius()))
+		return;
+
+	switch (collider.GetType())
+	{
+	case ObjType::ENEMY:
+	break;
+	}
+}
+
+void Bullet::Render(Graphics* backGraphics)
+{
+
+	myImage[13].Draw(backGraphics, position.xPos - 4, position.yPos - 4);
 }

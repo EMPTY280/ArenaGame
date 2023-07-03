@@ -1,7 +1,9 @@
 #include "Player.h"
 
 Player::Player(MyVector2 pos) : Behavior(pos, ObjType::PLAYER)
-	, aniCount(0), delay(0) { }
+, aniCount(0), delay(0) {
+	radius = 8.0f;
+}
 
 Player::~Player() { }
 
@@ -12,7 +14,7 @@ void Player::SetPosition(MyVector2 direction, bool relative)
 
 void Player::Start() { }
 
-void Player::Update(Graphics* backGraphics, float deltaTime) 
+void Player::Update(float deltaTime) 
 {	
 	delay += deltaTime;
 	if (delay > 0.1f)
@@ -29,12 +31,9 @@ void Player::Update(Graphics* backGraphics, float deltaTime)
 	if (direction.GetSize() <= 0.0f) aniCount = 1;
 
 	SetPosition(direction * deltaTime * moveSpeed);
-	myImage[walkSpriteIdx[aniCount]].Draw(backGraphics, position.xPos - 16, position.yPos - 16);
-}
 
-bool Player::Kill()
-{
-	return true;
+	if (position.xPos < radius)
+		position.xPos = radius;
 }
 
 std::vector<Behavior*> Player::Fire(MyVector2 dir)
@@ -69,6 +68,8 @@ std::vector<Behavior*> Player::Fire(MyVector2 dir)
 		b->SetAccel(acceleration);
 		b->SetLife(range);
 		b->SetRadius(caliver);
+		b->myImage = myImage;
+		b->SetTargetVector(dir * targetVecSize);
 
 		result.push_back((Behavior*)b);
 	}
@@ -82,10 +83,30 @@ bool Player::GetRight()
 
 void Player::SetRight(bool b)
 {
-	if (isRight == b)
+	isRight = b;
+}
+
+void Player::OnCollision(Behavior& collider)
+{
+	if (!Collider(collider.GetPosition(), collider.GetRadius()))
 		return;
 
-	for (int ele : walkSpriteIdx)
-		myImage[ele].FlipX(b);
-	isRight = b;
+	switch (collider.GetType())
+	{
+	case ObjType::ENEMY:
+	{
+		MyVector2 dir = position - collider.GetPosition();
+		float len = radius - (dir.GetSize()) * 0.5f;
+		dir.Normalize();
+
+		SetPosition(dir * len);
+	}
+	break;
+	}
+}
+
+void Player::Render(Graphics* backGraphics)
+{
+	myImage[walkSpriteIdx[aniCount]].FlipX(isRight);
+	myImage[walkSpriteIdx[aniCount]].Draw(backGraphics, position.xPos - 16, position.yPos - 16);
 }

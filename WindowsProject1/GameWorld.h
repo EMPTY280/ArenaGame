@@ -1,8 +1,21 @@
 #pragma once
+#include <queue>
+
 #include "SetMyImage.h"
 #include "Player.h"
 #include "SpriteZip.h"
 #include "Bullet.h"
+#include "Enemy.h"
+
+struct LayerSort
+{
+	bool operator()(Behavior* a, Behavior* b)
+	{
+		if (a->GetPosition().yPos > b->GetPosition().yPos)
+			return true;
+		return false;
+	}
+};
 
 class GameWorld
 {
@@ -17,6 +30,7 @@ private:
 	SpriteZip spriteZip;
 
 	std::vector<Behavior*> objList;
+	std::priority_queue<Behavior*, std::vector<Behavior*>, LayerSort> layer;
 
 public:
 	GameWorld();
@@ -30,4 +44,7 @@ public:
 	void GameOver(HWND& _hwnd, float deltaTime); // 게임 종료
 	void Input();
 	void MouseEvnet(long x, long y);
+
+	void CreateObject(std::vector<Behavior*>& src);
+	void CreateObject(Behavior* src);
 };
