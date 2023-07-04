@@ -5,12 +5,18 @@
 // 우측 비트 8 = 호출 시점에서 누른 상태인가
 // 좌특 비트 1 = 이전에 누른 적이 있는가
 
-GameWorld::GameWorld() : player(MyVector2(20, 20)) 
+GameWorld::GameWorld() : player(MyVector2(200, 200)) 
 {
 	PushObject(&player);
 }
 
-GameWorld::~GameWorld() { }
+GameWorld::~GameWorld()
+{ 
+	for (Behavior* ele : objList)
+	{
+		delete ele;
+	}
+}
 
 void GameWorld::Awake(HWND& _hwnd, HDC& _hdc) // 버퍼 만들기.
 {
@@ -100,6 +106,11 @@ void GameWorld::Render()
 {
 	if (paused)
 		return;
+
+	Font F(L"Arial", 20, FontStyleRegular, UnitPixel);
+	PointF P(10.0f, 10.0f);
+	SolidBrush B(Color(0, 0, 255));
+	backGraphics->DrawString(L"Test String", -1, &F, P, &B);
 
 	mainGraphics->DrawImage(memoryBitmap, 0, 0);
 	backGraphics->Clear(Color::Black);

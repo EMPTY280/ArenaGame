@@ -1,6 +1,6 @@
 #include "Bullet.h"
 
-Bullet::Bullet(MyVector2 pos) : Behavior(pos, ObjType::BULLET), MoveVector(0, 0) { }
+Bullet::Bullet(MyVector2 pos) : Behavior(pos, ObjType::BULLET), MoveVector(0, 0) { radius = 12.0f; }
 
 Bullet::~Bullet() { }
 
@@ -25,9 +25,10 @@ void Bullet::SetAccel(float accel)
 	acceleration = accel;
 }
 
-void Bullet::SetTargetVector(MyVector2 vec)
+void Bullet::SetTargetVector(MyVector2 vec, float power)
 {
-	TargetVector = vec;
+	targetVector = vec;
+	rotatePower = power;
 }
 
 void Bullet::Start() { }
@@ -48,9 +49,9 @@ void Bullet::Update(float delatTime)
 	if (velocity < 0.0f && acceleration <= 0.0f)
 		KillSelf();
 
-	if (TargetVector.GetSize() == 0.0f)
+	if (targetVector.GetSize() == 0.0f)
 		return;
-	MoveVector = MoveVector + TargetVector * delatTime;
+	MoveVector = MoveVector + targetVector * delatTime * rotatePower;
 	MoveVector.Normalize();
 }
 
@@ -66,14 +67,6 @@ void Bullet::SetOwnerPlayer(bool b)
 
 void Bullet::OnCollision(Behavior& collider)
 {
-	if (!Collider(collider.GetPosition(), collider.GetRadius()))
-		return;
-
-	switch (collider.GetType())
-	{
-	case ObjType::ENEMY:
-	break;
-	}
 }
 
 void Bullet::Render(Graphics* backGraphics)

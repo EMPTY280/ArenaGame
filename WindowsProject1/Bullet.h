@@ -10,7 +10,8 @@ private:
 
 	bool isPlayerOwned = true;
 
-	MyVector2 TargetVector = { 0.0f, 0.0f };
+	MyVector2 targetVector = { 0.0f, 0.0f };
+	float rotatePower = 0.0f;
 
 	MyVector2 preVector;
 
@@ -24,7 +25,7 @@ public:
 	void SetDirection(MyVector2 dir);
 	void SetSpeed(float time);
 	void SetAccel(float accel);
-	void SetTargetVector(MyVector2 vec);
+	void SetTargetVector(MyVector2 vec, float power);
 
 	virtual void Start() override;
 	virtual void Update(float delatTime) override;

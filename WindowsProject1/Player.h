@@ -23,14 +23,14 @@ private:
 	float fireDelay = 0.0f;
 	float fireDelayMax = 0.08f;
 
-	float velocity = 1000.0f; // pixel/sec
+	float velocity = 1500.0f; // pixel/sec
 	float acceleration = 0.0f; // pixel/sec^2
 
 	float range = 600.0f; // pixel
 	float caliver = 12.0f; // pixel radius
 
-	float spread = 0.05f; // radian
-	int multiShot = 1; // round
+	float spread = 0.1f; // radian
+	int multiShot = 2; // round
 
 	float multiShotSpread = 0.025f; // radian
 	float multiShotVelocityVariance = 0.0f; // percentage

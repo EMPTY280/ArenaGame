@@ -67,7 +67,7 @@ void Player::Fire(MyVector2 dir)
 		b->SetLife(range);
 		b->SetRadius(caliver);
 		b->myImage = myImage;
-		b->SetTargetVector(dir * targetVecSize);
+		b->SetTargetVector(dir, targetVecSize);
 
 		bullets.push_back((Behavior*)b);
 	}
