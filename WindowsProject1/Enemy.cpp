@@ -2,6 +2,10 @@
 
 Enemy::Enemy(MyVector2 pos, Behavior* target) : Behavior(pos, ObjType::ENEMY), target(target) { radius = 8.0f; }
 
+Enemy::~Enemy()
+{
+}
+
 void Enemy::Start()
 {
 }
@@ -28,7 +32,7 @@ void Enemy::Update(float delatTime)
 	else if (dir.xPos > 0.0f)
 		isRight = true;
 
-	SetPosition(dir * 50.0f * delatTime);
+	SetPosition(dir * moveSpeed * delatTime);
 }
 
 void Enemy::OnCollision(Behavior& collider)
@@ -43,13 +47,14 @@ void Enemy::OnCollision(Behavior& collider)
 	{
 	case ObjType::BULLET:
 		if (collider.GetLife() <= 0.0f) break;
+		if (!dynamic_cast<Bullet*>(&collider)->IsOwnerPlayer()) break;
 
 		hp -= 1.0f;
-		hitCount = 0.05f;
+		SetHitCount();
 		collider.SetLife(0.0f);
 
 		if (hp > 0.0f) break;
-		isDead = true;
+		KillSelf();
 		break;
 	case ObjType::PLAYER:
 	case ObjType::ENEMY:
@@ -75,4 +80,14 @@ void Enemy::Render(Graphics* backGraphics)
 
 	myImage[walkSpriteIdx[aniCount]].FlipX(isRight);
 	myImage[walkSpriteIdx[aniCount]].Draw(backGraphics, position.xPos - 16, position.yPos - 16);
+}
+
+void Enemy::SetHitCount()
+{
+	hitCount = hitCountMax;
+}
+
+void Enemy::SetHitCount(float time)
+{
+	hitCount = time;
 }

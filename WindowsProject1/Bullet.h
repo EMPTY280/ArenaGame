@@ -12,6 +12,8 @@ private:
 
 	MyVector2 TargetVector = { 0.0f, 0.0f };
 
+	MyVector2 preVector;
+
 public:
 	SetMyImage* myImage;
 

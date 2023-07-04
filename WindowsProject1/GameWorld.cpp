@@ -1,10 +1,13 @@
 #include "GameWorld.h"
 
-#define ON_PRESS(X) (::GetAsyncKeyState(X) & 0x8000f)
+#define ON_PRESS(X) (::GetAsyncKeyState(X) & 0x8000)
+#define ON_TOGGLE(X) (::GetAsyncKeyState(X) & 0x0001)
+// 우측 비트 8 = 호출 시점에서 누른 상태인가
+// 좌특 비트 1 = 이전에 누른 적이 있는가
 
 GameWorld::GameWorld() : player(MyVector2(20, 20)) 
 {
-	CreateObject(&player);
+	PushObject(&player);
 }
 
 GameWorld::~GameWorld() { }
@@ -30,13 +33,6 @@ void GameWorld::ImageLoad()
 {
 	spriteZip.SetImage();
 	player.myImage = spriteZip.playerImages;
-
-	for (int i = 0; i < 15; i++)
-	{
-		Enemy* e = new Enemy(MyVector2(rand() % 1280, rand() %  720), &player);
-		e->myImage = spriteZip.playerImages;
-		CreateObject(e);
-	}
 }
 
 void GameWorld::Start(HWND& _hwnd)  // 각종 오브젝트들 초기화
@@ -49,34 +45,40 @@ void GameWorld::Update(HWND& _hwnd, float deltaTime) // 게임 업데이트.
 	Graphics graphics(_hwnd);
 	Input();
 
-	//player.Update(backGraphics, deltaTime);
+	if (paused)
+		return;
 
-	int size = objList.size();
-	for (int i = 0; i < size; i++)
+	if (player.GetBulletsSize() > 0)
+	{
+		PushObject(player.GetBullets());
+		player.ClearBullets();
+	}
+	if (spawnBuffer.size() > 0)
+	{
+		PushObject(spawnBuffer);
+		ClearSpawnBuffer();
+	}
+
+	for (int i = 0; i < objList.size(); i++)
 	{
 		Behavior* ele = objList[i];
-
 		ele->Update(deltaTime);
 
+		// collision check
 		for (Behavior* ele2 : objList)
 			ele->OnCollision(*ele2);
 
+		// kill check
 		if (ele->IsDead())
 		{
-			if (ele->GetType() == ObjType::ENEMY)
-			{
-				Enemy* e = new Enemy(MyVector2(rand() % 1280, rand() % 720), &player);
-				e->myImage = spriteZip.playerImages;
-				CreateObject(e);
-			}
-
+			ele->OnKill(this);
 			delete ele;
 			objList.erase(objList.begin() + i);
 			i--;
-			size--;
+			continue;
 		}
-		else
-			layer.push(ele);
+		// push to draw queue
+		layer.push(ele);
 	}
 
 	while (!layer.empty())
@@ -84,12 +86,22 @@ void GameWorld::Update(HWND& _hwnd, float deltaTime) // 게임 업데이트.
 		layer.top()->Render(backGraphics);
 		layer.pop();
 	}
+
+	spawnInterval += deltaTime;
+	if (spawnInterval >= 2.0f)
+	{
+		spawnInterval = 0.0f;
+		SpawnEnemy();
+		SpawnEnemy();
+	}
 }
 
 void GameWorld::Render()
 {
-	mainGraphics->DrawImage(memoryBitmap, 00, 0);
+	if (paused)
+		return;
 
+	mainGraphics->DrawImage(memoryBitmap, 0, 0);
 	backGraphics->Clear(Color::Black);
 }
 
@@ -102,13 +114,7 @@ void GameWorld::ReleaseMemory(HWND& _hwnd, HDC& _hdc)
 	delete mainGraphics;
 }
 
-void GameWorld::MouseEvnet(long x, long y)
-{
-	mx = x;
-	my = y;
-}
-
-void GameWorld::CreateObject(std::vector<Behavior*>& src)
+void GameWorld::PushObject(std::vector<Behavior*>& src)
 {
 	if (src.size() <= 0)
 		return;
@@ -116,12 +122,32 @@ void GameWorld::CreateObject(std::vector<Behavior*>& src)
 	objList.insert(objList.end(), src.begin(), src.end());
 }
 
-void GameWorld::CreateObject(Behavior* src)
+void GameWorld::PushObject(Behavior* src)
 {
 	if (src == nullptr)
 		return;
 
 	objList.push_back(src);
+}
+
+void GameWorld::AddSpawnBuffer(Behavior* src)
+{
+	spawnBuffer.push_back(src);
+}
+
+void GameWorld::ClearSpawnBuffer()
+{
+	spawnBuffer.clear();
+}
+
+void GameWorld::SpawnEnemy()
+{
+	MyVector2 pos = { (float)(rand() % 1280), (float)(rand() % 720) };
+
+	Enemy* e = new Enemy(pos, &player);
+	e->myImage = spriteZip.playerImages;
+	Spawner* s = new Spawner(pos, e);
+	PushObject(s);
 }
 
 void GameWorld::GameOver(HWND& _hwnd, float deltaTime)
@@ -132,29 +158,32 @@ void GameWorld::GameOver(HWND& _hwnd, float deltaTime)
 
 void GameWorld::Input()
 {
-	float hor = 0.0f;
-	float ver = 0.0f;
-	bool right = player.GetRight();
+	if (ON_PRESS('W')) { player.SetMoveVector(0.0f, -1.0f); }
+	if (ON_PRESS('A')) { player.SetMoveVector(-1.0f, 0.0f); }
+	if (ON_PRESS('S')) { player.SetMoveVector(0.0f, 1.0f); }
+	if (ON_PRESS('D')) { player.SetMoveVector(1.0f, 0.0f); }
 
-	if (ON_PRESS('W')) ver -= 1.0f;
-	if (ON_PRESS('A')) { hor -= 1.0f; right = false; }
-	if (ON_PRESS('S')) ver += 1.0f;
-	if (ON_PRESS('D')) { hor += 1.0f; right = true; }
-	player.direction.SetDirection(hor, ver);
-	player.direction.Normalize();
+	if (ON_PRESS(VK_UP)) player.SetFireVector(0.0f, -1.0f);
+	if (ON_PRESS(VK_LEFT)) player.SetFireVector(-1.0f, 0.0f);
+	if (ON_PRESS(VK_DOWN)) player.SetFireVector(0.0f, 1.0f);
+	if (ON_PRESS(VK_RIGHT)) player.SetFireVector(1.0f, 0.0f);
 
-	bool fire = false;
-	MyVector2 bulletVec = { 0.0f, 0.0f };
+	if (ON_TOGGLE(VK_SPACE)) paused = !paused;
 
-	if (ON_PRESS(VK_UP)) { fire = true; bulletVec.yPos = -1.0f; }
-	if (ON_PRESS(VK_LEFT)) { right = false; fire = true; bulletVec.xPos = -1.0f; }
-	if (ON_PRESS(VK_DOWN)) { fire = true; bulletVec.yPos = 1.0f; }
-	if (ON_PRESS(VK_RIGHT)) { right = true; fire = true; bulletVec.xPos = +1.0f; }
-	if (fire)
+	if (mouseDown)
 	{
-		bulletVec.Normalize();
-		std::vector<Behavior*> bullets = player.Fire(bulletVec);
-		CreateObject(bullets);
+		MyVector2 v = MyVector2(mx, my) - player.GetPosition();
+		player.SetFireVector(v.xPos, v.yPos);
 	}
-	player.SetRight(right);
+}
+
+void GameWorld::UpdateMousePos(long x, long y)
+{
+	mx = x;
+	my = y;
+}
+
+void GameWorld::SetMouseDown(bool b)
+{
+	mouseDown = b;
 }

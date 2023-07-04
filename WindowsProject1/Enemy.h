@@ -7,6 +7,7 @@ class Enemy : public Behavior
 {
 private:
 	Behavior* target;
+	float moveSpeed = 75.0f;
 
 	float hp = 3.0f;
 
@@ -17,14 +18,19 @@ private:
 	float delay;
 
 	float hitCount = 0.0f;
+	float hitCountMax = 0.05f;
 
 public:
 	SetMyImage* myImage;
 
 	Enemy(MyVector2 pos, Behavior* target);
+	virtual ~Enemy() override;
 
 	virtual void Start() override;
 	virtual void Update(float delatTime) override;
 	virtual void OnCollision(Behavior& collider) override;
 	virtual void Render(Graphics* backGraphics) override;
+
+	void SetHitCount();
+	void SetHitCount(float time);
 };

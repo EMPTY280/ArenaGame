@@ -1,6 +1,11 @@
 #include "Behavior.h"
 
-Behavior::Behavior(MyVector2 pos, ObjType type) : position(pos), type(type) 
+void Behavior::KillSelf()
+{
+	isDead = true;
+}
+
+Behavior::Behavior(MyVector2 pos, ObjType type) : position(pos), type(type)
 	, radius(16.0f), lifeTime(-1.0f), isDead(false) { }
 
 Behavior::~Behavior() { }
@@ -19,6 +24,10 @@ void Behavior::SetPosition(MyVector2 direction, bool relative)
 	}
 
 	position = direction;
+}
+
+void Behavior::OnKill(GameWorld* world)
+{
 }
 
 bool Behavior::Collider(MyVector2 bPos, float bRadius)

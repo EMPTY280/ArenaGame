@@ -84,6 +84,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 //
 ATOM MyRegisterClass(HINSTANCE hInstance)
 {
+    srand((unsigned int)time(NULL));
+
     WNDCLASSEXW wcex;
 
     wcex.cbSize = sizeof(WNDCLASSEX);
@@ -166,14 +168,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             }
         }
         break;
-    case WM_LBUTTONDOWN:
+    case WM_MOUSEMOVE:
     {
         mousePosition.x = LOWORD(lParam);
         mousePosition.y = HIWORD(lParam);
-
-        world.MouseEvnet(mousePosition.x, mousePosition.y); // 마우스 좌표 받아서 Find알고리즘 적용.
+        world.UpdateMousePos(mousePosition.x, mousePosition.y);
     }
-    break;
+        break;
+    case WM_LBUTTONDOWN:
+        world.SetMouseDown(true);
+        break;
+    case WM_LBUTTONUP:
+        world.SetMouseDown(false);
+        break;
     case WM_PAINT:
         {
             PAINTSTRUCT ps;

@@ -148,6 +148,7 @@
     <ClInclude Include="Player.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="SetMyImage.h" />
+    <ClInclude Include="Spawner.h" />
     <ClInclude Include="SpriteZip.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="WindowsProject1.h" />
@@ -160,6 +161,7 @@
     <ClCompile Include="MyVector2.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="SetMyImage.cpp" />
+    <ClCompile Include="Spawner.cpp" />
     <ClCompile Include="SpriteZip.cpp" />
     <ClCompile Include="WindowsProject1.cpp" />
   </ItemGroup>

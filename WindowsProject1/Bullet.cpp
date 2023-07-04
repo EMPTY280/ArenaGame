@@ -34,6 +34,7 @@ void Bullet::Start() { }
 
 void Bullet::Update(float delatTime)
 {
+	preVector = position;
 	SetPosition(MoveVector * delatTime * velocity);
 
 	if (lifeTime == -1.0f)
@@ -41,11 +42,11 @@ void Bullet::Update(float delatTime)
 
 	lifeTime -= delatTime * MoveVector.GetSize() * velocity;
 	if (lifeTime <= 0.0f)
-		isDead = true;
+		KillSelf();
 
 	velocity += acceleration * delatTime;
 	if (velocity < 0.0f && acceleration <= 0.0f)
-		isDead = true;
+		KillSelf();
 
 	if (TargetVector.GetSize() == 0.0f)
 		return;
@@ -77,6 +78,15 @@ void Bullet::OnCollision(Behavior& collider)
 
 void Bullet::Render(Graphics* backGraphics)
 {
+	int spriteNum = 13;
+	if (!isPlayerOwned)
+		spriteNum = 17;
+	myImage[spriteNum].Draw(backGraphics, position.xPos - 4, position.yPos - 4);
 
-	myImage[13].Draw(backGraphics, position.xPos - 4, position.yPos - 4);
+	MyVector2 startVec = position + (preVector - position).Normalize() * 4.0f;
+	MyVector2 startVec2 = (position - MyVector2(1.0f, 1.0f)) + (preVector - position).Normalize() * 4.0f;
+		
+	Pen pen(Color(255, 255, 255));
+	backGraphics->DrawLine(&pen, startVec.xPos, startVec.yPos, preVector.xPos, preVector.yPos);
+	backGraphics->DrawLine(&pen, startVec2.xPos, startVec2.yPos, preVector.xPos, preVector.yPos);
 }

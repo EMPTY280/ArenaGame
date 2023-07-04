@@ -7,41 +7,39 @@ Player::Player(MyVector2 pos) : Behavior(pos, ObjType::PLAYER)
 
 Player::~Player() { }
 
-void Player::SetPosition(MyVector2 direction, bool relative)
-{
-	Behavior::SetPosition(direction, relative);
-}
-
 void Player::Start() { }
 
 void Player::Update(float deltaTime) 
 {	
+	// movement
+	MyVector2 dir = moveVecBuffer.Normalize();
+	SetPosition(dir * deltaTime * moveSpeed);
+	ResetMoveVector();
+
+	// attack
+	if (fireDelay > 0.0f)
+		fireDelay -= deltaTime;
+	fireVecBuffer.Normalize();
+	if (fireVecBuffer.GetSize() > 0.0f)
+		Fire(fireVecBuffer);
+	ResetFireVector();
+
+	// animation
 	delay += deltaTime;
 	if (delay > 0.1f)
 	{
 		delay = 0.0f;
 		aniCount++;
-		if (aniCount > 3)
-			aniCount = 0;
+		if (aniCount > 3) aniCount = 0;
 	}
 
-	if (fireDelay > 0.0f)
-		fireDelay -= deltaTime;
-
-	if (direction.GetSize() <= 0.0f) aniCount = 1;
-
-	SetPosition(direction * deltaTime * moveSpeed);
-
-	if (position.xPos < radius)
-		position.xPos = radius;
+	if (dir.GetSize() <= 0.0f) aniCount = 1;
 }
 
-std::vector<Behavior*> Player::Fire(MyVector2 dir)
+void Player::Fire(MyVector2 dir)
 {
-	std::vector<Behavior*> result;
-
 	if (fireDelay > 0.0f)
-		return result;
+		return;
 	fireDelay += fireDelayMax;
 
 	for (int i = 0; i < multiShot; i++)
@@ -63,7 +61,7 @@ std::vector<Behavior*> Player::Fire(MyVector2 dir)
 
 		float bulletSpeed = velocity;
 		if (multiShotVelocityVariance > 0)
-			bulletSpeed -= rand() % multiShotVelocityVariance;
+			bulletSpeed -= (rand() % (int)(multiShotVelocityVariance * 100) * 0.01) * bulletSpeed;
 		b->SetSpeed(bulletSpeed);
 		b->SetAccel(acceleration);
 		b->SetLife(range);
@@ -71,14 +69,8 @@ std::vector<Behavior*> Player::Fire(MyVector2 dir)
 		b->myImage = myImage;
 		b->SetTargetVector(dir * targetVecSize);
 
-		result.push_back((Behavior*)b);
+		bullets.push_back((Behavior*)b);
 	}
-	return result;
-}
-
-bool Player::GetRight()
-{
-	return isRight;
 }
 
 void Player::SetRight(bool b)
@@ -109,4 +101,47 @@ void Player::Render(Graphics* backGraphics)
 {
 	myImage[walkSpriteIdx[aniCount]].FlipX(isRight);
 	myImage[walkSpriteIdx[aniCount]].Draw(backGraphics, position.xPos - 16, position.yPos - 16);
+}
+
+void Player::SetMoveVector(float x, float y)
+{
+	moveVecBuffer += MyVector2(x, y);
+	if (moveVecBuffer.xPos > 0)
+		SetRight(true);
+	else
+		SetRight(false);
+}
+
+void Player::ResetMoveVector()
+{
+	moveVecBuffer = MyVector2(0.0f, 0.0f);
+}
+
+void Player::SetFireVector(float x, float y)
+{
+	fireVecBuffer += MyVector2(x, y);
+	if (fireVecBuffer.xPos > 0)
+		SetRight(true);
+	else
+		SetRight(false);
+}
+
+void Player::ResetFireVector()
+{
+	fireVecBuffer = MyVector2(0.0f, 0.0f);
+}
+
+int Player::GetBulletsSize()
+{
+	return bullets.size();
+}
+
+std::vector<Behavior*>& Player::GetBullets()
+{
+	return bullets;
+}
+
+void Player::ClearBullets()
+{
+	bullets.clear();
 }

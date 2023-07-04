@@ -2,24 +2,31 @@
 #include "SetMyImage.h"
 #include "MyVector2.h"
 
+class GameWorld;
+
 enum class ObjType
 {
 	MISC,
 	PLAYER,
 	ENEMY,
-	BULLET
+	BULLET,
+	SPAWNER
 };
 
 // 오브젝트들은 Bahavior를 상속받는다.
 class Behavior
 {
+private:
+	bool isDead;
+
 protected:
 	MyVector2 position;
 	float radius;
-	ObjType type = ObjType::MISC;
+	ObjType type;
 
 	float lifeTime;
-	bool isDead;
+
+	void KillSelf();
 
 public:
 	Behavior(MyVector2 pos, ObjType type);
@@ -30,7 +37,10 @@ public:
 	virtual void SetPosition(MyVector2 direction, bool relative = true);
 
 	virtual void Start() = 0;
-	virtual void Update(float delatTime) = 0;  // 업데이트 
+	virtual void Update(float delatTime) = 0;
+	virtual void OnCollision(Behavior& collider) = 0;
+	virtual void Render(Graphics* backGraphics) = 0;
+	virtual void OnKill(GameWorld* world);
 
 	// 컬라이더 체크
 	bool Collider(MyVector2 bPos, float bRadius);
@@ -48,7 +58,4 @@ public:
 	void SetRadius(float r);
 
 	bool IsDead();
-
-	virtual void OnCollision(Behavior& collider) = 0;
-	virtual void Render(Graphics* backGraphics) = 0;
 };

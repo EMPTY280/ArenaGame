@@ -37,15 +37,17 @@ void MyVector2::SetDirection(float _xPos, float _yPos)
 	this->yPos = _yPos;
 }
 
-void MyVector2::Normalize()
+MyVector2 MyVector2::Normalize()
 {
 	float dist = sqrt(powf(xPos, 2) + powf(yPos, 2));
 
 	if (dist == 0.0f)
-		return;
+		return *this;
 
 	xPos /= dist;
 	yPos /= dist;
+
+	return *this;
 }
 
 void MyVector2::MyNomalizedDirection(MyVector2 a, MyVector2 b)
