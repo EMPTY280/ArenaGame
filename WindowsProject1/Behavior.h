@@ -38,7 +38,7 @@ public:
 
 	virtual void Start() = 0;
 	virtual void Update(float delatTime) = 0;
-	virtual void OnCollision(Behavior& collider) = 0;
+	virtual void OnCollision(Behavior& collider, float deltaTime) = 0;
 	virtual void Render(Graphics* backGraphics) = 0;
 	virtual void OnKill(GameWorld* world);
 

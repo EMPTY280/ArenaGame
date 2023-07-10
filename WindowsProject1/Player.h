@@ -21,16 +21,17 @@ private:
 
 	// ¥‹¿ß : √ 
 	float fireDelay = 0.0f;
-	float fireDelayMax = 0.08f;
+	float fireDelayMax = 0.1f;
 
-	float velocity = 1500.0f; // pixel/sec
+	float velocity = 888800.0f; // pixel/sec
 	float acceleration = 0.0f; // pixel/sec^2
 
-	float range = 600.0f; // pixel
-	float caliver = 12.0f; // pixel radius
+	float range = 900.0f; // pixel
+	float caliver = 4.0f; // pixel radius
+	float damage = 0.0f;
 
 	float spread = 0.1f; // radian
-	int multiShot = 2; // round
+	int multiShot = 1; // round
 
 	float multiShotSpread = 0.025f; // radian
 	float multiShotVelocityVariance = 0.0f; // percentage
@@ -43,13 +44,11 @@ public:
 	Player(MyVector2 pos);
 	virtual ~Player();
 	SetMyImage *myImage;
-	
-	//virtual void SetPosition(MyVector2 direction, bool relative= true) override;
 
 	virtual void Start() override;
 	virtual void Update(float deltaTime) override;
 	virtual void Render(Graphics* backGraphics) override;
-	virtual void OnCollision(Behavior& collider) override;
+	virtual void OnCollision(Behavior& collider, float deltaTime) override;
 
 	void Fire(MyVector2 dir);
 	void SetRight(bool b);
@@ -60,5 +59,7 @@ public:
 	int GetBulletsSize();
 	std::vector<Behavior*>& GetBullets();
 	void ClearBullets();
+
+	void ShowRange(Graphics* backGraphics);
 };
 

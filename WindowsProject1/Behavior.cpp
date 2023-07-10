@@ -34,9 +34,14 @@ bool Behavior::Collider(MyVector2 bPos, float bRadius)
 {
 	bool isEnter = false;
 
-	float dist = sqrt(pow(position.xPos - bPos.xPos, 2) + pow(position.yPos - bPos.yPos, 2));
+	float xx = position.xPos - bPos.xPos;
+	float yy = position.yPos - bPos.yPos;
 
-	if (dist <= radius + bRadius)
+	float dist = xx * xx + yy * yy;
+
+	float tt = radius + bRadius;
+
+	if (dist <= tt * tt)
 	{
 		isEnter = true;
 	}

@@ -21,7 +21,7 @@ void Spawner::Update(float delatTime)
 		KillSelf();
 }
 
-void Spawner::OnCollision(Behavior& collider)
+void Spawner::OnCollision(Behavior& collider, float deltaTime)
 {
 }
 

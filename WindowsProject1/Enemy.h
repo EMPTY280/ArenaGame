@@ -28,9 +28,12 @@ public:
 
 	virtual void Start() override;
 	virtual void Update(float delatTime) override;
-	virtual void OnCollision(Behavior& collider) override;
+	virtual void OnCollision(Behavior& collider, float deltaTime) override;
 	virtual void Render(Graphics* backGraphics) override;
 
 	void SetHitCount();
 	void SetHitCount(float time);
+
+	void TakeDamage(float amount);
+	float GetHP();
 };

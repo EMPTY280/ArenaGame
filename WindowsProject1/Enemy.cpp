@@ -35,7 +35,7 @@ void Enemy::Update(float delatTime)
 	SetPosition(dir * moveSpeed * delatTime);
 }
 
-void Enemy::OnCollision(Behavior& collider)
+void Enemy::OnCollision(Behavior& collider, float deltaTime)
 {
 	if (!Collider(collider.GetPosition(), collider.GetRadius()))
 		return;
@@ -45,17 +45,6 @@ void Enemy::OnCollision(Behavior& collider)
 
 	switch (collider.GetType())
 	{
-	case ObjType::BULLET:
-		if (collider.GetLife() <= 0.0f) break;
-		if (!dynamic_cast<Bullet*>(&collider)->IsOwnerPlayer()) break;
-
-		hp -= 1.0f;
-		SetHitCount();
-		collider.SetLife(0.0f);
-
-		if (hp > 0.0f) break;
-		KillSelf();
-		break;
 	case ObjType::PLAYER:
 	case ObjType::ENEMY:
 	{
@@ -90,4 +79,18 @@ void Enemy::SetHitCount()
 void Enemy::SetHitCount(float time)
 {
 	hitCount = time;
+}
+
+void Enemy::TakeDamage(float amount)
+{
+	hp -= amount;
+	SetHitCount();
+
+	if (hp <= 0.0f)
+		KillSelf();
+}
+
+float Enemy::GetHP()
+{
+	return hp;
 }

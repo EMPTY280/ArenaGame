@@ -18,7 +18,7 @@ public:
 	// Behavior을(를) 통해 상속됨
 	virtual void Start() override;
 	virtual void Update(float delatTime) override;
-	virtual void OnCollision(Behavior& collider) override;
+	virtual void OnCollision(Behavior& collider, float deltaTime) override;
 	virtual void Render(Graphics* backGraphics) override;
 	virtual void OnKill(GameWorld* world) override;
 };

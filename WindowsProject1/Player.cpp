@@ -62,12 +62,13 @@ void Player::Fire(MyVector2 dir)
 		float bulletSpeed = velocity;
 		if (multiShotVelocityVariance > 0)
 			bulletSpeed -= (rand() % (int)(multiShotVelocityVariance * 100) * 0.01) * bulletSpeed;
+		b->SetRange(range);
 		b->SetSpeed(bulletSpeed);
 		b->SetAccel(acceleration);
-		b->SetLife(range);
 		b->SetRadius(caliver);
 		b->myImage = myImage;
 		b->SetTargetVector(dir, targetVecSize);
+		b->SetDamage(damage);
 
 		bullets.push_back((Behavior*)b);
 	}
@@ -78,7 +79,7 @@ void Player::SetRight(bool b)
 	isRight = b;
 }
 
-void Player::OnCollision(Behavior& collider)
+void Player::OnCollision(Behavior& collider, float deltaTime)
 {
 	if (!Collider(collider.GetPosition(), collider.GetRadius()))
 		return;
@@ -106,9 +107,9 @@ void Player::Render(Graphics* backGraphics)
 void Player::SetMoveVector(float x, float y)
 {
 	moveVecBuffer += MyVector2(x, y);
-	if (moveVecBuffer.xPos > 0)
+	if (moveVecBuffer.xPos > 0.0f)
 		SetRight(true);
-	else
+	else if (moveVecBuffer.xPos < 0.0f)
 		SetRight(false);
 }
 
@@ -120,9 +121,9 @@ void Player::ResetMoveVector()
 void Player::SetFireVector(float x, float y)
 {
 	fireVecBuffer += MyVector2(x, y);
-	if (fireVecBuffer.xPos > 0)
+	if (fireVecBuffer.xPos > 0.0f)
 		SetRight(true);
-	else
+	else if (fireVecBuffer.xPos < 0.0f)
 		SetRight(false);
 }
 
@@ -144,4 +145,16 @@ std::vector<Behavior*>& Player::GetBullets()
 void Player::ClearBullets()
 {
 	bullets.clear();
+}
+
+void Player::ShowRange(Graphics* backGraphics)
+{
+	Pen pen(Color::Lime);
+
+	int xx = position.xPos - range;
+	int yy = position.yPos - range;
+	int diameter = range * 2;
+
+	backGraphics->DrawEllipse(&pen, xx, yy, diameter, diameter);
+	backGraphics->DrawRectangle(&pen, (int)position.xPos, (int)position.yPos, 1, 1);
 }

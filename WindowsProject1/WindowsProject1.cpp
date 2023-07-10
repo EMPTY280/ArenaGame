@@ -4,6 +4,7 @@
 #include "WindowsProject1.h"
 #include "GameWorld.h"
 #define MAX_LOADSTRING 100
+#pragma comment(linker, "/entry:wWinMainCRTStartup /subsystem:console")
 
 HWND hwnd;
 GameWorld world;  // 게임실행에 필요한 모든것.
@@ -63,9 +64,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
             float currentTime = (float)timeGetTime();
             float deltaTime = (currentTime - lastTime) * 0.001f;
 
+            lastTime = currentTime;
+
             world.Update(hwnd, deltaTime);  // 업데이트. 가변시간 방식 적용.
 
-            lastTime = currentTime;
+            //lastTime = currentTime;
             world.Render();  // 그림 그리기. 
         }
     }

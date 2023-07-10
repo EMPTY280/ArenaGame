@@ -1,4 +1,7 @@
+#include <cstdlib>
+
 #include "Bullet.h"
+#include "Enemy.h"
 
 Bullet::Bullet(MyVector2 pos) : Behavior(pos, ObjType::BULLET), MoveVector(0, 0) { radius = 12.0f; }
 
@@ -31,11 +34,29 @@ void Bullet::SetTargetVector(MyVector2 vec, float power)
 	rotatePower = power;
 }
 
+void Bullet::SetDamage(float dam)
+{
+	damage = dam;
+}
+
+void Bullet::SetRange(float range)
+{
+	this->range = range;
+	lifeTime = range;
+}
+
 void Bullet::Start() { }
 
 void Bullet::Update(float delatTime)
 {
-	preVector = position;
+	if (velocity * delatTime > range)
+		velocity = range / delatTime - 0.1f;
+
+	preVectors.push(position);
+
+	if (preVectors.size() >= 5)
+		preVectors.pop();
+
 	SetPosition(MoveVector * delatTime * velocity);
 
 	if (lifeTime == -1.0f)
@@ -65,21 +86,89 @@ void Bullet::SetOwnerPlayer(bool b)
 	isPlayerOwned = b;
 }
 
-void Bullet::OnCollision(Behavior& collider)
+void Bullet::OnCollision(Behavior& collider, float deltaTime)
 {
+	MyVector2 prePos;
+	float projection;
+
+	if (&collider == this)
+		return;
+
+	if (abs(velocity) <= 1)
+	{
+		if (!Collider(collider.GetPosition(), collider.GetRadius()))
+			return;
+	}
+	else
+	{
+		float dist = 0;
+
+		prePos = position - MoveVector * velocity * deltaTime;
+
+		MyVector2 bulletVec(MoveVector * velocity * deltaTime); // 총알의 이동 궤적 선분
+		MyVector2 toTarget(collider.GetPosition() - prePos); // 목표 까지의 상대 거리
+		projection = (bulletVec.xPos * toTarget.xPos + bulletVec.yPos * toTarget.yPos) / bulletVec.GetSize();
+
+		if (projection <= 0)
+			dist = toTarget.GetSize();
+		else if (projection < bulletVec.GetSize())
+		{
+			printf("!");
+			dist = sqrt(powf(toTarget.GetSize(), 2.0f) - powf(projection, 2.0f));
+		}
+		else
+			dist = MyVector2(collider.GetPosition() - (position)).GetSize();
+
+		if (dist > radius + collider.GetRadius())
+			return;
+	}
+	switch (collider.GetType())
+	{
+	case ObjType::ENEMY:
+		if (GetLife() <= 0.0f) break;
+		if (!IsOwnerPlayer()) break;
+
+		Enemy* e = dynamic_cast<Enemy*>(&collider);
+		e->TakeDamage(damage);
+
+		position = prePos + MoveVector * projection;
+
+		SetLife(0.0f);
+
+		break;
+	}
 }
 
 void Bullet::Render(Graphics* backGraphics)
 {
-	int spriteNum = 13;
+	Color bulletColor(255, 255, 255);
 	if (!isPlayerOwned)
-		spriteNum = 17;
-	myImage[spriteNum].Draw(backGraphics, position.xPos - 4, position.yPos - 4);
+		bulletColor = Color(255, 0, 0);
 
-	MyVector2 startVec = position + (preVector - position).Normalize() * 4.0f;
-	MyVector2 startVec2 = (position - MyVector2(1.0f, 1.0f)) + (preVector - position).Normalize() * 4.0f;
+	int size = radius * 0.5f;
 		
-	Pen pen(Color(255, 255, 255));
-	backGraphics->DrawLine(&pen, startVec.xPos, startVec.yPos, preVector.xPos, preVector.yPos);
-	backGraphics->DrawLine(&pen, startVec2.xPos, startVec2.yPos, preVector.xPos, preVector.yPos);
+	float rightAngle = 3.14159265358979f * 0.5f;
+	float rightRad = atan2f(MoveVector.yPos, MoveVector.xPos);
+
+	MyVector2 rightVec1(cos(rightRad + rightAngle), sin(rightRad + rightAngle));
+	MyVector2 rightVec2(cos(rightRad - rightAngle), sin(rightRad - rightAngle));
+
+	Point p1(position.xPos + rightVec1.xPos * size, position.yPos + rightVec1.yPos * size);
+	Point p2(preVectors.front().xPos, preVectors.front().yPos);
+	Point p3(position.xPos + rightVec2.xPos * size, position.yPos + rightVec2.yPos * size);
+	Point p4(position.xPos + MoveVector.xPos * size, position.yPos + MoveVector.yPos * size);
+
+	GraphicsPath p;
+	Point points[] = { p3, p4, p1 };
+
+	p.AddLine(p1, p2);
+	p.AddLine(p2, p3);
+	p.AddLine(p3, p1);
+	SolidBrush brush(bulletColor);
+	backGraphics->FillPath(&brush, &p);
+	
+	int xx = position.xPos - size;
+	int yy = position.yPos - size;
+
+	backGraphics->FillEllipse(&brush, xx, yy, (int)radius, (int)radius);
 }

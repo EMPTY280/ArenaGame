@@ -12,10 +12,7 @@ GameWorld::GameWorld() : player(MyVector2(200, 200))
 
 GameWorld::~GameWorld()
 { 
-	for (Behavior* ele : objList)
-	{
-		delete ele;
-	}
+
 }
 
 void GameWorld::Awake(HWND& _hwnd, HDC& _hdc) // 버퍼 만들기.
@@ -44,6 +41,7 @@ void GameWorld::ImageLoad()
 void GameWorld::Start(HWND& _hwnd)  // 각종 오브젝트들 초기화
 {
 	player.Start();
+	SpawnEnemy();
 }
 
 void GameWorld::Update(HWND& _hwnd, float deltaTime) // 게임 업데이트.
@@ -68,11 +66,8 @@ void GameWorld::Update(HWND& _hwnd, float deltaTime) // 게임 업데이트.
 	for (int i = 0; i < objList.size(); i++)
 	{
 		Behavior* ele = objList[i];
-		ele->Update(deltaTime);
 
-		// collision check
-		for (Behavior* ele2 : objList)
-			ele->OnCollision(*ele2);
+		ele->Update(deltaTime);
 
 		// kill check
 		if (ele->IsDead())
@@ -87,19 +82,30 @@ void GameWorld::Update(HWND& _hwnd, float deltaTime) // 게임 업데이트.
 		layer.push(ele);
 	}
 
+	for (int i = 0; i < objList.size(); i++)
+	{
+		Behavior* ele = objList[i];
+
+		// collision check
+		for (Behavior* ele2 : objList)
+			ele->OnCollision(*ele2, deltaTime);
+	}
+
 	while (!layer.empty())
 	{
 		layer.top()->Render(backGraphics);
+		//layer.top()->ShowCollider(backGraphics);
 		layer.pop();
 	}
 
-	spawnInterval += deltaTime;
+	//spawnInterval += deltaTime;
 	if (spawnInterval >= 2.0f)
 	{
 		spawnInterval = 0.0f;
 		SpawnEnemy();
-		SpawnEnemy();
 	}
+
+	//player.ShowRange(backGraphics);
 }
 
 void GameWorld::Render()
