@@ -1,14 +1,11 @@
 #include "Enemy.h"
+#include "Corpse.h"
 
-Enemy::Enemy(MyVector2 pos, Behavior* target) : Behavior(pos, ObjType::ENEMY), target(target) { radius = 8.0f; }
+Enemy::Enemy(MyVector2 pos, Behavior* target, GameWorld* g) : Behavior(pos, ObjType::ENEMY), target(target), g(g) { radius = 8.0f; }
 
-Enemy::~Enemy()
-{
-}
+Enemy::~Enemy() { }
 
-void Enemy::Start()
-{
-}
+void Enemy::Start() { }
 
 void Enemy::Update(float delatTime)
 {
@@ -33,6 +30,7 @@ void Enemy::Update(float delatTime)
 		isRight = true;
 
 	SetPosition(dir * moveSpeed * delatTime);
+	BlockBoundary();
 }
 
 void Enemy::OnCollision(Behavior& collider, float deltaTime)
@@ -53,6 +51,7 @@ void Enemy::OnCollision(Behavior& collider, float deltaTime)
 		dir.Normalize();
 
 		SetPosition(dir * len);
+		BlockBoundary();
 	}
 		break;
 	}
@@ -81,13 +80,23 @@ void Enemy::SetHitCount(float time)
 	hitCount = time;
 }
 
-void Enemy::TakeDamage(float amount)
+void Enemy::TakeDamage(float amount, Bullet damageSource)
 {
 	hp -= amount;
 	SetHitCount();
 
-	if (hp <= 0.0f)
-		KillSelf();
+	if (hp > 0.0f)
+		return;
+	
+	MyVector2 dir = damageSource.GetDirection();
+
+	Corpse* c = new Corpse(position);
+	c->SetImage(this->myImage);
+	c->SetRight(isRight);
+	c->SetMove(dir, damageSource.GetSpeed() * 0.5f);
+	g->PushObject(c);
+
+	KillSelf();
 }
 
 float Enemy::GetHP()

@@ -45,6 +45,16 @@ void Bullet::SetRange(float range)
 	lifeTime = range;
 }
 
+MyVector2 Bullet::GetDirection()
+{
+	return MoveVector;
+}
+
+float Bullet::GetSpeed()
+{
+	return velocity;
+}
+
 void Bullet::Start() { }
 
 void Bullet::Update(float delatTime)
@@ -88,11 +98,13 @@ void Bullet::SetOwnerPlayer(bool b)
 
 void Bullet::OnCollision(Behavior& collider, float deltaTime)
 {
-	MyVector2 prePos;
-	float projection;
-
 	if (&collider == this)
 		return;
+	if (collider.GetType() != ObjType::ENEMY)
+		return;
+
+	MyVector2 prePos;
+	float projection;
 
 	if (abs(velocity) <= 1)
 	{
@@ -112,10 +124,7 @@ void Bullet::OnCollision(Behavior& collider, float deltaTime)
 		if (projection <= 0)
 			dist = toTarget.GetSize();
 		else if (projection < bulletVec.GetSize())
-		{
-			printf("!");
 			dist = sqrt(powf(toTarget.GetSize(), 2.0f) - powf(projection, 2.0f));
-		}
 		else
 			dist = MyVector2(collider.GetPosition() - (position)).GetSize();
 
@@ -129,7 +138,7 @@ void Bullet::OnCollision(Behavior& collider, float deltaTime)
 		if (!IsOwnerPlayer()) break;
 
 		Enemy* e = dynamic_cast<Enemy*>(&collider);
-		e->TakeDamage(damage);
+		e->TakeDamage(damage, Bullet(*this));
 
 		position = prePos + MoveVector * projection;
 
@@ -156,19 +165,23 @@ void Bullet::Render(Graphics* backGraphics)
 	Point p1(position.xPos + rightVec1.xPos * size, position.yPos + rightVec1.yPos * size);
 	Point p2(preVectors.front().xPos, preVectors.front().yPos);
 	Point p3(position.xPos + rightVec2.xPos * size, position.yPos + rightVec2.yPos * size);
-	Point p4(position.xPos + MoveVector.xPos * size, position.yPos + MoveVector.yPos * size);
 
 	GraphicsPath p;
-	Point points[] = { p3, p4, p1 };
-
 	p.AddLine(p1, p2);
 	p.AddLine(p2, p3);
 	p.AddLine(p3, p1);
-	SolidBrush brush(bulletColor);
-	backGraphics->FillPath(&brush, &p);
-	
+
+	PathGradientBrush b(&p);
+	Color colors[] = { Color(255, 255, 255), Color(0, 255, 255, 255), Color(255, 255, 255) };
+	int count = 3;
+	b.SetCenterPoint(p1);
+	b.SetSurroundColors(colors, &count);
+
+	backGraphics->FillPath(&b, &p);
+
 	int xx = position.xPos - size;
 	int yy = position.yPos - size;
 
+	SolidBrush brush(bulletColor);
 	backGraphics->FillEllipse(&brush, xx, yy, (int)radius, (int)radius);
 }

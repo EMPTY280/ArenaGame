@@ -5,7 +5,7 @@
 // 우측 비트 8 = 호출 시점에서 누른 상태인가
 // 좌특 비트 1 = 이전에 누른 적이 있는가
 
-GameWorld::GameWorld() : player(MyVector2(200, 200)) 
+GameWorld::GameWorld() : player(MyVector2(200, 200), this) 
 {
 	PushObject(&player);
 }
@@ -41,7 +41,6 @@ void GameWorld::ImageLoad()
 void GameWorld::Start(HWND& _hwnd)  // 각종 오브젝트들 초기화
 {
 	player.Start();
-	SpawnEnemy();
 }
 
 void GameWorld::Update(HWND& _hwnd, float deltaTime) // 게임 업데이트.
@@ -52,11 +51,6 @@ void GameWorld::Update(HWND& _hwnd, float deltaTime) // 게임 업데이트.
 	if (paused)
 		return;
 
-	if (player.GetBulletsSize() > 0)
-	{
-		PushObject(player.GetBullets());
-		player.ClearBullets();
-	}
 	if (spawnBuffer.size() > 0)
 	{
 		PushObject(spawnBuffer);
@@ -68,7 +62,22 @@ void GameWorld::Update(HWND& _hwnd, float deltaTime) // 게임 업데이트.
 		Behavior* ele = objList[i];
 
 		ele->Update(deltaTime);
+	}
 
+	// collision check
+	for (int i = 0; i < objList.size(); i++)
+	{
+		Behavior* ele = objList[i];
+		for (int r = 0; r < objList.size(); r++)
+		{
+			Behavior* ele2 = objList[r];
+			ele->OnCollision(*ele2, deltaTime);
+		}
+	}
+
+	for (int i = 0; i < objList.size(); i++)
+	{
+		Behavior* ele = objList[i];
 		// kill check
 		if (ele->IsDead())
 		{
@@ -82,30 +91,13 @@ void GameWorld::Update(HWND& _hwnd, float deltaTime) // 게임 업데이트.
 		layer.push(ele);
 	}
 
-	for (int i = 0; i < objList.size(); i++)
-	{
-		Behavior* ele = objList[i];
-
-		// collision check
-		for (Behavior* ele2 : objList)
-			ele->OnCollision(*ele2, deltaTime);
-	}
-
 	while (!layer.empty())
 	{
 		layer.top()->Render(backGraphics);
-		//layer.top()->ShowCollider(backGraphics);
 		layer.pop();
 	}
 
-	//spawnInterval += deltaTime;
-	if (spawnInterval >= 2.0f)
-	{
-		spawnInterval = 0.0f;
-		SpawnEnemy();
-	}
-
-	//player.ShowRange(backGraphics);
+	SpawnEnemy(deltaTime);
 }
 
 void GameWorld::Render()
@@ -157,11 +149,17 @@ void GameWorld::ClearSpawnBuffer()
 	spawnBuffer.clear();
 }
 
-void GameWorld::SpawnEnemy()
+void GameWorld::SpawnEnemy(float deltaTime)
 {
+	spawnInterval += deltaTime;
+
+	if (spawnDelay > spawnInterval)
+		return;
+	spawnInterval = 0.0f;
+
 	MyVector2 pos = { (float)(rand() % 1280), (float)(rand() % 720) };
 
-	Enemy* e = new Enemy(pos, &player);
+	Enemy* e = new Enemy(pos, &player, this);
 	e->myImage = spriteZip.playerImages;
 	Spawner* s = new Spawner(pos, e);
 	PushObject(s);

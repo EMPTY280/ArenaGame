@@ -27,6 +27,7 @@ protected:
 	float lifeTime;
 
 	void KillSelf();
+	void BlockBoundary();
 
 public:
 	Behavior(MyVector2 pos, ObjType type);

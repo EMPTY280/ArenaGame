@@ -56,7 +56,7 @@ void Spawner::Render(Graphics* backGraphics)
 
 	float exclamationSIze = (1 + ratio * 0.5f);
 	if (spawnDelay >= spawnDelayMax * 0.75f)
-		exclamationSIze = ((1.0f + 0.2f * ((int)(spawnDelay * 100) % 2)) + ratio * 0.5f);
+		exclamationSIze = ((1.0f + 0.2f * ((int)(spawnDelay * 100) % 8 < 4 ? 1 : 0)) + ratio * 0.5f);
 
 	int xx = position.xPos - 3.5f * exclamationSIze;
 	int yy = position.yPos - 12 * exclamationSIze;

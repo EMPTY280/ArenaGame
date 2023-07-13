@@ -5,6 +5,18 @@ void Behavior::KillSelf()
 	isDead = true;
 }
 
+void Behavior::BlockBoundary()
+{
+	if (position.xPos < 16)
+		position.xPos = 16;
+	if (position.xPos > 1264)
+		position.xPos = 1264;
+	if (position.yPos < 16)
+		position.yPos = 16;
+	if (position.yPos > 640)
+		position.yPos = 640;
+}
+
 Behavior::Behavior(MyVector2 pos, ObjType type) : position(pos), type(type)
 	, radius(16.0f), lifeTime(-1.0f), isDead(false) { }
 

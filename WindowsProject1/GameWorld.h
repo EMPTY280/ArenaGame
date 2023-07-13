@@ -42,7 +42,8 @@ private:
 	std::priority_queue<Behavior*, std::vector<Behavior*>, LayerSort> layer;
 
 	float spawnInterval = 0.0f;
-	void SpawnEnemy();
+	void SpawnEnemy(float deltaTime);
+	float spawnDelay = 0.5f;
 	std::vector<Behavior*> spawnBuffer;
 
 	bool paused = false;

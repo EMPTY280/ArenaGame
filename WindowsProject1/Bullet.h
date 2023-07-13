@@ -32,6 +32,9 @@ public:
 	void SetDamage(float dam);
 	void SetRange(float range);
 
+	MyVector2 GetDirection();
+	float GetSpeed();
+
 	virtual void Start() override;
 	virtual void Update(float delatTime) override;
 

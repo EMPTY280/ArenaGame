@@ -1,6 +1,7 @@
 #include "Player.h"
+#include "GameWorld.h"
 
-Player::Player(MyVector2 pos) : Behavior(pos, ObjType::PLAYER)
+Player::Player(MyVector2 pos, GameWorld* g) : Behavior(pos, ObjType::PLAYER), g(g)
 , aniCount(0), delay(0) {
 	radius = 8.0f;
 }
@@ -15,6 +16,7 @@ void Player::Update(float deltaTime)
 	MyVector2 dir = moveVecBuffer.Normalize();
 	SetPosition(dir * deltaTime * moveSpeed);
 	ResetMoveVector();
+	BlockBoundary();
 
 	// attack
 	if (fireDelay > 0.0f)
@@ -70,7 +72,7 @@ void Player::Fire(MyVector2 dir)
 		b->SetTargetVector(dir, targetVecSize);
 		b->SetDamage(damage);
 
-		bullets.push_back((Behavior*)b);
+		g->PushObject(b);
 	}
 }
 
@@ -93,6 +95,7 @@ void Player::OnCollision(Behavior& collider, float deltaTime)
 		dir.Normalize();
 
 		SetPosition(dir * len);
+		BlockBoundary();
 	}
 	break;
 	}
@@ -130,21 +133,6 @@ void Player::SetFireVector(float x, float y)
 void Player::ResetFireVector()
 {
 	fireVecBuffer = MyVector2(0.0f, 0.0f);
-}
-
-int Player::GetBulletsSize()
-{
-	return bullets.size();
-}
-
-std::vector<Behavior*>& Player::GetBullets()
-{
-	return bullets;
-}
-
-void Player::ClearBullets()
-{
-	bullets.clear();
 }
 
 void Player::ShowRange(Graphics* backGraphics)

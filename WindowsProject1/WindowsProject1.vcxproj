@@ -141,6 +141,7 @@
   <ItemGroup>
     <ClInclude Include="Behavior.h" />
     <ClInclude Include="Bullet.h" />
+    <ClInclude Include="Corpse.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="GameWorld.h" />
@@ -156,6 +157,7 @@
   <ItemGroup>
     <ClCompile Include="Behavior.cpp" />
     <ClCompile Include="Bullet.cpp" />
+    <ClCompile Include="Corpse.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="GameWorld.cpp" />
     <ClCompile Include="MyVector2.cpp" />

@@ -1,4 +1,4 @@
-18
+19
 Image/ArenaSprites/Player_0.png
 Image/ArenaSprites/Player_1.png
 Image/ArenaSprites/Player_2.png
@@ -17,3 +17,4 @@ Image/ArenaSprites/Hit_0.png
 Image/ArenaSprites/Hit_1.png
 Image/ArenaSprites/Hit_2.png
 Image/ArenaSprites/Pellet_Hostile.png
+Image/ArenaSprites/Enemy_Corpse.png

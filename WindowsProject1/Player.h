@@ -17,18 +17,19 @@ private:
 	float delay;
 
 	MyVector2 fireVecBuffer = { 0.0f, 0.0f };
-	std::vector<Behavior*> bullets;
+
+	GameWorld* g;
 
 	// ¥‹¿ß : √ 
 	float fireDelay = 0.0f;
-	float fireDelayMax = 0.1f;
+	float fireDelayMax = 0.05f;
 
-	float velocity = 888800.0f; // pixel/sec
+	float velocity = 10000.0f; // pixel/sec
 	float acceleration = 0.0f; // pixel/sec^2
 
 	float range = 900.0f; // pixel
-	float caliver = 4.0f; // pixel radius
-	float damage = 0.0f;
+	float caliver = 8.0f; // pixel radius
+	float damage = 1.0f;
 
 	float spread = 0.1f; // radian
 	int multiShot = 1; // round
@@ -36,12 +37,12 @@ private:
 	float multiShotSpread = 0.025f; // radian
 	float multiShotVelocityVariance = 0.0f; // percentage
 
-	float targetVecSize = 0.0f;
+	float targetVecSize = 0.8f;
 
 	void ResetMoveVector();
 	void ResetFireVector();
 public:
-	Player(MyVector2 pos);
+	Player(MyVector2 pos, GameWorld* g);
 	virtual ~Player();
 	SetMyImage *myImage;
 
@@ -55,10 +56,6 @@ public:
 
 	void SetMoveVector(float x, float y);
 	void SetFireVector(float x, float y);
-
-	int GetBulletsSize();
-	std::vector<Behavior*>& GetBullets();
-	void ClearBullets();
 
 	void ShowRange(Graphics* backGraphics);
 };

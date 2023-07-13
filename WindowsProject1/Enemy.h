@@ -20,10 +20,12 @@ private:
 	float hitCount = 0.0f;
 	float hitCountMax = 0.05f;
 
+	GameWorld* g;
+
 public:
 	SetMyImage* myImage;
 
-	Enemy(MyVector2 pos, Behavior* target);
+	Enemy(MyVector2 pos, Behavior* target, GameWorld* g);
 	virtual ~Enemy() override;
 
 	virtual void Start() override;
@@ -34,6 +36,6 @@ public:
 	void SetHitCount();
 	void SetHitCount(float time);
 
-	void TakeDamage(float amount);
+	void TakeDamage(float amount, Bullet damageSource);
 	float GetHP();
 };
